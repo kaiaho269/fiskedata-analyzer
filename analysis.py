@@ -78,3 +78,28 @@ def rank_vessels_by_value(
     
     
     return conn.execute(query).fetchdf()
+def follow_vessels(vessel_ids):
+    conn = connect()
+
+    ids = ", ".join(f"'{v}'" for v in vessel_ids)
+
+    query = f"""
+        SELECT
+            "Fartøy ID" AS vessel_id,
+            MAX("Fartøynavn") AS vessel_name,
+            MAX("Registreringsmerke (seddel)") AS registration,
+            "Hovedområde (kode)" AS main_area,
+            "Lokasjon (kode)" AS location,
+            "Art - gruppe" AS species,
+            SUM(TRY_CAST("Fangstverdi" AS DOUBLE)) AS catch_value_nok
+        {base_query()}
+        WHERE "Fartøy ID" IN ({ids})
+        GROUP BY
+            "Fartøy ID",
+            "Hovedområde (kode)",
+            "Lokasjon (kode)",
+            "Art - gruppe"
+        ORDER BY catch_value_nok DESC
+    """
+
+    return conn.execute(query).fetchdf()
