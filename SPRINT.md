@@ -38,6 +38,21 @@ The goal is **not** to make a CSV viewer. The goal is to let a user define a fis
   - follows selected vessel IDs across the entire dataset
   - returns area, species, catch value, vessel name and registration
 
+### Architecture waypoint: geography pivot
+
+- Statistical areas are too coarse for the primary user-facing analysis.
+- The project should not use statistical areas as a proxy for actual fishing grounds.
+- Primary geography should be based on:
+  1. AIS activity / tracks
+  2. Mottak / landing locations
+  3. Vessel identity
+  4. Catch data (species, kg, NOK)
+- Statistical areas remain available as an official secondary/reference field.
+- Core concept:
+  AIS activity → vessel → catch → mottak
+- Real-world validation: small vessels (<8 m) already use AIS voluntarily, and many local vessels are visible in NAIS.
+- Example: Kua in Julsundet → vessels may deliver to different mottak (e.g. Horsgård / O. Skarsbø), so geographic proximity alone does not determine the landing relationship.
+
 ### Important terminology / data rules
 
 - `Fartøy ID` = internal vessel identifier
