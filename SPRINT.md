@@ -336,6 +336,30 @@ Keep ideas here instead of immediately coding them.
 
 ---
 
+## 2026-11-01 — Mid-sprint checkpoint
+
+### DONE
+- Validated `rank_vessels_by_value()` for 07-31 → Under 11 m → Torsk + Sei: 58 vessels.
+- Confirmed 45 of the 58 vessels caught both Torsk and Sei.
+- Validated `follow_vessels()` across the full 2025 dataset.
+- For these 58 vessels: 43,983,433 NOK total recorded 2025 value.
+- 11,788,755 NOK was recorded in 07-31; 32,194,678 NOK outside 07-31 (~73.2%).
+- Validated the area-by-area value footprint of the 58-vessel fleet.
+- Identified Fiskeridirektoratet's official GIS services as the source for statistical-area names and geometries.
+- Agreed on the architecture: human map layer → official statistical codes → vessel IDs → DuckDB analysis.
+
+### NEXT
+1. Identify the exact official GIS layer for statistical-area polygons and names.
+2. Build a local area reference/translation layer.
+3. Continue the Fleet Investigation UI using the validated backend.
+
+### IDEAS
+- Map-based My Home Area
+- Multi-cell Home Area
+- Human-friendly area names
+- Home vs outside-home comparison
+- Species and area footprint
+
 ## Sprint habit
 
 At the end of every sprint, update:

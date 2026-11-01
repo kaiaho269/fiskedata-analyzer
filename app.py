@@ -1,5 +1,6 @@
 import streamlit as st
 import duckdb
+from analysis import rank_vessels_by_value
 
 CSV_PATH = "/home/kaiaho/Downloads/fangstdata_2025.csv"
 
@@ -82,3 +83,18 @@ with col2:
     )
 
 st.success("🐟 Dataset connected successfully.")
+
+
+st.subheader("Fleet Investigation")
+
+fleet = rank_vessels_by_value(
+    areas=[("07", "31")],
+    species=["Torsk", "Sei"],
+    vessel_size="Under 11 m"
+)
+
+st.dataframe(
+    fleet,
+    use_container_width=True,
+    hide_index=True
+)
