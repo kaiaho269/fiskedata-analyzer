@@ -391,4 +391,34 @@ Interesting things that should NOT distract from the current sprint.
 ### GIT
 Last pushed commit.
 
+### 2026-11-01 — Landing / buyer-register investigation
+
+#### DONE
+- Investigated `Mottaksstasjon` as the physical landing-place identifier.
+- Downloaded Fiskeridirektoratet's official buyer register.
+- Confirmed `Mottaksstasjon` / approval-number codes can be linked to the buyer register via `Godkjenningsnummer Mattilsynet`.
+- Confirmed the buyer register contains company name, buyer/site ID, address, municipality and coordinates.
+- Confirmed one approval number may correspond to multiple registered buyer sites.
+- Example: M325 maps to Marine Sales AS, Hitramat AS and AS Aalesundfisk.
+- Example: M360 maps to Abs AS and Andreas Bjørge Seafood.
+- Example: M374 maps to Marine Sales AS at Kaia på Stokksund, Herøy.
+- Confirmed some buyer sites have coordinates while others do not.
+- Confirmed 2,738 buyer-register rows with non-null buyer/site IDs and no duplicate buyer-site IDs in the downloaded register.
+- Found 406 `Mottaksstasjon` codes linked to more than one buyer/site ID.
+- The most complex observed code had 5 buyer/site IDs.
+- Conclusion: landing geography is a many-to-many / multi-site real-world structure, not a simple single-point lookup.
+- Important distinction established:
+  buyer/company ≠ receiving site ≠ physical quay/landing location.
+- This supports the architecture pivot toward:
+  AIS activity → vessel → catch → landing → receiving site/buyer.
+
+#### NEXT
+1. Model buyer/company and receiving-site relationships explicitly in the data layer.
+2. Determine how `Mottaksstasjon` in catch data should be resolved when several buyer sites share the same approval number.
+3. Investigate whether the official data contains additional information that can distinguish the actual physical landing point from the buyer/company location.
+4. Keep statistical sea areas as secondary/reference geography, not as the primary representation of fishing grounds.
+
+#### IMPORTANT
+Real-world validation: a buyer may have a physical facility at a quay, a sales point at a marina/port, and/or collect fish from vessels by vehicle. Therefore "landing place" must not be treated as simply "the buyer's company address" or "one coordinate per buyer".
+
 This file is the project's memory between ChatGPT chats.
