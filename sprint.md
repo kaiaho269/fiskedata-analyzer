@@ -70,3 +70,29 @@ This makes the number of results immediately visible without requiring the user 
 
 ### Sprint result
 The filter architecture is now one step closer to having a clear separation between UI selections and analysis/query logic.
+## Sprint 3 – 2026-11-02
+
+### Completed
+- Continued filter architecture cleanup.
+- Added `get_summary()` to move KPI query logic into the analysis layer.
+- Connected Gear filtering to Fleet Investigation.
+- Added Area selection to the UI.
+- Verified statistical areas 07-31 and 07-32 against the dataset.
+- Refactored Area handling in `app.py` so UI selection is converted into an `areas` parameter before calling the analysis layer.
+- Verified 07-31 returns 82 vessels.
+- Verified 07-32 returns 16 vessels.
+- Verified `app.py` and `analysis.py` with `py_compile`.
+- Verified the Streamlit UI after the changes.
+
+### Sprint result
+The filter flow is becoming cleaner:
+UI selections → analysis layer → DuckDB → results.
+
+Area and Gear are now passed explicitly into the analysis layer instead of being embedded directly in the Fleet Investigation query call.
+
+### Next
+- Continue consolidating filter logic in the analysis layer.
+- Add species selection in a controlled way.
+- Eventually remove the remaining duplicate filter/query logic from `app.py`.
+- Later investigate dependent/interacting filter options.
+

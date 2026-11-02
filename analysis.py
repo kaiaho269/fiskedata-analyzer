@@ -113,3 +113,32 @@ def follow_vessels(vessel_ids):
     """
 
     return conn.execute(query).fetchdf()
+
+def get_summary(length=None, gear=None):
+    conn = connect()
+
+    filters = []
+
+    if length and length != "All vessels":
+        if length == "Under 11 m":
+            filters.append(
+                'TRY_CAST(REPLACE("Største lengde", \',\', \'.\') AS DOUBLE) < 11'
+            )
+
+    if gear and gear != "All gears":
+        filters.append(f'"Redskap" = \'{gear}\'')
+
+    where_clause = ""
+
+    if filters:
+        where_clause = "WHERE " + " AND ".join(filters)
+
+    query = f"""
+    SELECT
+        COUNT(*) AS records,
+        COUNT(DISTINCT "Fartøy ID") AS vessels
+    {base_query()}
+    {where_clause}
+    """
+
+    return conn.execute(query).fetchone()

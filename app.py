@@ -1,6 +1,6 @@
 import streamlit as st
 import duckdb
-from analysis import rank_vessels_by_value
+from analysis import rank_vessels_by_value, get_summary
 
 CSV_PATH = "/home/kaiaho/Downloads/fangstdata_2025.csv"
 
@@ -34,38 +34,21 @@ gear_filter = st.sidebar.selectbox(
     ]
 )
 
-# Build filters
-filters = []
-
-if length_filter == "Under 11 m":
-    filters.append("""
-        TRY_CAST(
-            REPLACE("Største lengde", ',', '.')
-            AS DOUBLE
-        ) < 11
-    """)
-
-if gear_filter == "Juksa/pilk":
-    filters.append('"Redskap" = \'Juksa/pilk\'')
-
-where_clause = ""
-
-if filters:
-    where_clause = "WHERE " + " AND ".join(filters)
-
-# Query
-query = f"""
-SELECT
-    COUNT(*) AS records,
-    COUNT(DISTINCT "Fartøy ID") AS vessels
-FROM read_csv_auto(
-    '{CSV_PATH}',
-    delim=';'
+area_filter = st.sidebar.selectbox(
+    "Area",
+    [
+        "Romsdalsfjorden 07-31",
+        "Romsdalsfjorden 07-32"
+    ]
 )
-{where_clause}
-"""
 
-result = conn.execute(query).fetchone()
+# Build filters
+
+
+result = get_summary(
+    length=length_filter,
+    gear=gear_filter
+)
 
 # KPIs
 col1, col2 = st.columns(2)
@@ -87,9 +70,16 @@ st.success("🐟 Dataset connected successfully.")
 
 st.subheader("Fleet Investigation")
 
+areas = None
+
+if area_filter == "Romsdalsfjorden 07-31":
+    areas = [("07", "31")]
+
+elif area_filter == "Romsdalsfjorden 07-32":
+    areas = [("07", "32")]
 
 fleet = rank_vessels_by_value(
-    areas=[("07", "31")],
+    areas=areas,
     species=["Torsk", "Sei"],
     vessel_size=length_filter,
     gear=gear_filter
