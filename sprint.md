@@ -29,3 +29,44 @@
 - Do not build dependent Booking.com-style filters yet; first make the underlying filter/query architecture solid.
 - README does not require an update for this sprint.
 
+## Sprint 2 — 2026-11-02
+
+### Completed
+- Reviewed the filter architecture in `app.py` and `analysis.py`.
+- Identified that filter logic was split between the UI and analysis layer.
+- Added `gear` as a filter parameter to `rank_vessels_by_value()`.
+- Connected the Gear selection in `app.py` to Fleet Investigation.
+- Verified that filtering by `Juksa/pilkki` changes the Fleet Investigation result from 82 vessels to 17 vessels.
+- Verified the analysis code with direct Python tests.
+- Added a total vessel count above the Fleet Investigation table.
+- Verified the application runs successfully in Streamlit.
+- Verified `app.py` and `analysis.py` with `py_compile`.
+
+### Architecture
+Current direction:
+
+app.py
+→ user selections
+→ analysis.py
+→ SQL filters
+→ DuckDB
+→ results
+
+The goal is to gradually move filter logic toward the analysis layer rather than maintaining separate SQL filter logic in the UI.
+
+### UX
+Fleet Investigation now displays:
+
+`Total vessels: N`
+
+This makes the number of results immediately visible without requiring the user to discover that the table continues below the visible area.
+
+### Known follow-up
+- The main KPI query in `app.py` still has its own filter construction and should eventually be aligned with the analysis layer.
+- Vessel-size filtering is still implemented differently in `app.py` and `analysis.py`.
+- Species and area are still hard-coded for Fleet Investigation.
+- Dependent/interactive filter options will be considered later, after the underlying architecture is stable.
+- Streamlit still reports the `use_container_width` deprecation warning; this can be cleaned up later.
+
+### Sprint result
+The filter architecture is now one step closer to having a clear separation between UI selections and analysis/query logic.

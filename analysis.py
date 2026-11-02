@@ -19,7 +19,8 @@ def rank_vessels_by_value(
     end_date=None,
     vessel_size=None,
     areas=None,
-    species=None
+    species=None,
+    gear=None
 ):
     conn = connect()
 
@@ -62,6 +63,15 @@ def rank_vessels_by_value(
 
         filters.append(f'"Art - gruppe" IN ({species_list})')
 
+    if gear and gear != "All gears":
+        if isinstance(gear, str):
+            gear = [gear]
+
+        gear_list = ", ".join(
+            f"'{g}'" for g in gear
+        )
+
+        filters.append(f'"Redskap" IN ({gear_list})')    
     where_clause = " AND ".join(filters)
 
     query = f"""

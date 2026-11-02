@@ -91,8 +91,11 @@ st.subheader("Fleet Investigation")
 fleet = rank_vessels_by_value(
     areas=[("07", "31")],
     species=["Torsk", "Sei"],
-    vessel_size=length_filter
+    vessel_size=length_filter,
+    gear=gear_filter
 )
+
+st.caption(f"Total vessels: {len(fleet):,}")
 
 st.dataframe(
     fleet,
