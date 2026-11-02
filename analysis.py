@@ -39,7 +39,7 @@ def rank_vessels_by_value(
         "28 m og over": 5,
     }
 
-    if vessel_size:
+    if vessel_size and vessel_size != "All vessels":
         code = size_codes[vessel_size]
         filters.append(f'"Lengdegruppe (kode)" = {code}')
 

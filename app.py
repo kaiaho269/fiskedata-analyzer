@@ -87,10 +87,11 @@ st.success("🐟 Dataset connected successfully.")
 
 st.subheader("Fleet Investigation")
 
+
 fleet = rank_vessels_by_value(
     areas=[("07", "31")],
     species=["Torsk", "Sei"],
-    vessel_size="Under 11 m"
+    vessel_size=length_filter
 )
 
 st.dataframe(
