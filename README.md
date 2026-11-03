@@ -15,6 +15,8 @@ landing patterns.
 The project is also a practical learning project for developing
 data analysis, Python, DuckDB, Streamlit, Git and GitHub skills.
 
+> **New to development?** Start with [FOR_BEGINNERS.md](FOR_BEGINNERS.md).
+
 ## Current status
 
 🚧 Active development
