@@ -1,202 +1,131 @@
-# Fiskedata Analyzer — Sprint Guide
+# Fiskedata Analyzer — Project Guide
 
 ## Purpose
 
-Fiskedata Analyzer is a fishing-fleet intelligence tool built on the Norwegian Directorate of Fisheries 2025 catch data.
+Fiskedata Analyzer (FA) is a personal fisheries intelligence and analysis tool built on official Norwegian fisheries data.
 
-The goal is **not** to make a CSV viewer. The goal is to let a user define a fishing fleet/home area and then investigate:
+The goal is not to make a CSV viewer. The goal is to help answer useful questions such as:
 
-> Who fishes here, what do they catch, what is it worth, and where else do they fish?
+> Who fishes here, what do they catch, what is it worth, where do they fish elsewhere, and where do they land the catch?
+
+The project follows a simple principle:
+
+**Questions before dashboards. Analysis before presentation. Evidence before assumptions.**
 
 ---
 
-# 1. Current status — 2026-11-01
+# Current architecture
+
+```text
+Human / Streamlit UI
+        ↓
+FA analysis layer
+        ↓
+DuckDB
+        ↓
+Official fisheries data
+```
+
+The UI should collect human choices and translate them into analytical parameters. Numerical truth belongs in the analysis layer, not in the UI and not in an AI model.
+
+Long-term direction:
+
+```text
+FAQuery / language layer
+        ↓
+FA query layer
+        ↓
+FA analytical engine
+        ↓
+DuckDB / Parquet
+        ↓
+data
+```
+
+Python + Streamlit + DuckDB are appropriate for the current stage. Technology can change later; analytical knowledge and reproducibility are the durable assets.
+
+---
+
+# Current state — 2026-11-03
 
 ### Data
 - Source: Fiskeridirektoratet 2025 catch data
 - Raw CSV: `~/Downloads/fangstdata_2025.csv`
 - Size: ~1 GB
-- Catch records: **974,502**
-- Unique vessels: **4,591**
+- Catch records: ~974,502
+- Unique vessels: ~4,591
 - Engine: DuckDB
 - Python environment: `.venv`
 
-### Backend already working
+### Working capabilities
+- Basic Streamlit application
+- Vessel/value ranking
+- Vessel name and registration display
+- Vessel tracking across the full dataset
+- Vessel-size filtering
+- Gear filtering
+- Area filtering
+- KPI summary through the analysis layer
+- Data-driven species selection
+- `All species` translated to analytical `None`
 
-`analysis.py` contains:
+### Important analytical direction
+Statistical sea areas are useful official reference geography, but they should not be treated as a direct representation of actual fishing grounds.
 
-- `rank_vessels_by_value(...)`
-  - date filtering
-  - vessel-size filtering
-  - multiple statistical areas
-  - species filtering
-  - catch value in NOK
-  - vessel name
-  - registration mark
+The longer-term geography model is:
 
-- `follow_vessels(...)`
-  - follows selected vessel IDs across the entire dataset
-  - returns area, species, catch value, vessel name and registration
+```text
+AIS activity → vessel → catch → landing → receiving site / buyer
+```
 
-### Architecture waypoint: geography pivot
+Statistical areas remain available as secondary/reference geography.
 
-- Statistical areas are too coarse for the primary user-facing analysis.
-- The project should not use statistical areas as a proxy for actual fishing grounds.
-- Primary geography should be based on:
-  1. AIS activity / tracks
-  2. Mottak / landing locations
-  3. Vessel identity
-  4. Catch data (species, kg, NOK)
-- Statistical areas remain available as an official secondary/reference field.
-- Core concept:
-  AIS activity → vessel → catch → mottak
-- Real-world validation: small vessels (<8 m) already use AIS voluntarily, and many local vessels are visible in NAIS.
-- Example: Kua in Julsundet → vessels may deliver to different mottak (e.g. Horsgård / O. Skarsbø), so geographic proximity alone does not determine the landing relationship.
+### Landing geography
+Investigation of `Mottaksstasjon` and the official buyer register showed that a receiving/landing relationship is not simply one buyer = one coordinate. One approval number can map to multiple registered buyer sites, and company address, receiving site and physical quay are not necessarily the same thing.
 
-### Important terminology / data rules
-
-- `Fartøy ID` = internal vessel identifier
-- `Fartøynavn` = vessel name
-- `Registreringsmerke (seddel)` = registration mark
-- Example: `TF0008S` represents the real-world registration **TF-8-S**
-- `TF` = Troms og Finnmark
-- `M` = Møre og Romsdal
-- Registration format changed historically, so do **not** treat the raw string as the final display format.
-- `Kvotefartøy` means a vessel with quota; it is still an ordinary vessel in the fleet.
-- Open-group vessels have seasonal limits for species such as torsk and sei.
-
-### Proven analysis checkpoint
-
-Initial home-area test:
-- Main area: `07`
-- Location: `31`
-- Combined test area: `07-30`, `07-31`, `07-32`
-
-For `07-31`:
-- Under 11 m + torsk/sei:
-  - **58 unique vessels**
-  - **45 caught both torsk and sei**
-
-The backend can now follow those vessel IDs across the whole 2025 dataset.
+This means landing geography must eventually be modelled explicitly rather than treated as a simple lookup.
 
 ---
 
-# 2. Current UI
+# Current UI / development focus
 
-Streamlit UI is running at:
+The immediate objective is to make FA an investigation tool rather than a dashboard.
 
-`http://localhost:8501`
+Core concept:
 
-Current screen has:
-- Fiskedata Analyzer title
-- Catch records
-- Unique vessels
-- Vessel length filter
-- Gear filter
-- Dataset connection status
+**HOME AREA → FLEET → CATCH → VALUE → ELSEWHERE**
 
-The next UI step is deliberately **big**, not cosmetic.
+The UI should eventually let a user define a human-friendly Home Area, identify the fleet associated with it, inspect catch and value, and follow selected vessels elsewhere.
+
+The species filter is now data-driven from the dataset rather than hard-coded.
 
 ---
 
-# 3. NEXT SPRINT — Build the Fleet Investigation UI
+# Current sprint — Sprint 14
 
-## Main concept
+## Project memory cleanup and history reconstruction
 
-### HOME AREA → FLEET → CATCH → VALUE → ELSEWHERE
+The first 13 meaningful repository commits are being represented as individual sprint records under `sprints/`.
 
-The user should not have to think in ugly statistical codes.
+This keeps the project guide small and current while preserving the reasoning and direction changes that shaped FA.
 
-### Home Area
-
-Eventually this will be a **map-based selection**.
-
-The user can select one or more statistical grid cells to create a logical:
-
-> **My Home Area**
-
-Example:
-- 07-30
-- 07-31
-- 07-32
-- possibly additional neighboring cells
-
-The codes remain underneath in the analysis layer.
-
-## First UI version
-
-Use `07-31` as the working test area.
-
-Controls:
-1. Home Area
-2. Species
-   - Torsk
-   - Sei
-   - Both
-   - later: any species
-3. Vessel size
-   - All
-   - Under 11 m
-   - 11–14.99 m
-   - 15–20.99 m
-   - 21–27.99 m
-   - 28 m and over
-
-## Fleet result
-
-Show a proper table:
-
-| Vessel | Registration | Catch | Value |
-|---|---|---:|---:|
-| ARNØYTIND | TF-8-S | ... t | ... NOK |
-
-Important:
-- Display vessel name and registration to humans.
-- Keep `Fartøy ID` internally for joins/tracking.
-- Format registration marks for display (`TF0008S` → `TF-8-S`).
-
-## Vessel investigation
-
-Selecting a vessel should show:
-
-- Vessel name
-- Registration
-- Total 2025 catch
-- Total 2025 value
-- Home-area catch
-- Home-area value
-- Outside-home-area catch
-- Outside-home-area value
-- % of catch from home area
-- % of value from home area
-- Areas fished elsewhere
-- Species caught elsewhere
-
-This is the core "follow the fleet" feature.
+### Tasks
+1. Keep one markdown file per historical sprint.
+2. Use `SPRINT.md` only as the current project guide.
+3. Retire the old monolithic `sprint.md` history file.
+4. After the cleanup, begin new development from a clean Sprint 14 state.
 
 ---
 
-# 4. Product architecture
+# Next 1–3 development tasks
 
-Keep these layers separate.
-
-### Human layer
-Map + simple UI:
-> "My Home Area"
-
-### Analysis layer
-Selected map cells → official statistical codes → vessel IDs → calculations
-
-### Data layer
-DuckDB + official Fiskeridirektoratet fields.
-
-This separation is important.
-
-**Do not redesign the analysis engine just because the map UI changes.**
+1. Finish the Fleet Investigation UI using the now-clean filter architecture.
+2. Make vessel drill-down useful: home-area catch/value vs outside-area catch/value and elsewhere footprint.
+3. Continue validating geography and landing relationships before adding map/AIS complexity.
 
 ---
 
-# 5. Roadmap
+# Roadmap
 
 ## Phase 1 — Fleet discovery
 - [x] Connect 2025 dataset
@@ -208,22 +137,22 @@ This separation is important.
 - [x] Registration marks
 - [x] Multiple statistical areas in backend
 - [x] Follow selected vessels across dataset
-- [ ] Big Fleet Investigation UI
+- [x] Data-driven species filter
+- [ ] Fleet Investigation drill-down
 - [ ] Home Area selector
 - [ ] Multi-cell Home Area
-- [ ] Vessel drill-down
 - [ ] Home vs outside-home comparison
 
-## Phase 2 — Map
-- [ ] Statistical-area map
-- [ ] Click/select grid cells
-- [ ] Save Home Area
+## Phase 2 — Geography
+- [ ] Statistical-area reference layer
+- [ ] Map-based Home Area
 - [ ] Human-friendly area names
-- [ ] Keep official codes hidden underneath
+- [ ] Keep official codes underneath the UI
+- [ ] Explicit receiving-site / buyer model
 
 ## Phase 3 — Fleet intelligence
 - [ ] Species breakdown
-- [ ] Area-by-area movement/fishing footprint
+- [ ] Area-by-area fishing footprint
 - [ ] Annual catch/value
 - [ ] Home-area dependency
 - [ ] Fleet comparisons
@@ -232,193 +161,77 @@ This separation is important.
 
 ## Phase 4 — Time
 - [ ] 2024
-- [ ] 2025
+- [x] 2025
 - [ ] 2026
 - [ ] Year-over-year comparison
 - [ ] Seasonal analysis
 
 ## Phase 5 — Advanced
 - [ ] AIS integration
-- [ ] Fishing effort analysis
+- [ ] Fishing-effort analysis
 - [ ] Spatial/temporal patterns
-- [ ] More advanced fleet behaviour analysis
+- [ ] Advanced fleet behaviour analysis
 
 ---
 
-# 6. Development rules
+# Development rules
 
-### Every sprint starts here
-
-Before coding:
+Every focused sprint should:
 1. Read this file.
-2. Check the current UI.
+2. Check the current UI when relevant.
 3. Check `git status`.
-4. Identify **one sprint goal**.
-5. Make small changes.
-6. Test.
-7. Commit.
-8. Push to GitHub.
-9. Update this file.
-
-### Git rule
-
-Every meaningful completed feature gets:
-
-```bash
-git add <files>
-git commit -m "Short description"
-git push
-```
-
-Never assume work is safe until it is pushed.
+4. Pick one clear goal.
+5. Make small understandable changes.
+6. Test the analytical result.
+7. Record the sprint in `sprints/sprintN.md`.
+8. Commit and push.
 
 ### Data rule
-
-Never put the raw 1 GB CSV into GitHub.
+Never put the raw ~1 GB CSV into GitHub.
 
 ### Analysis rule
-
 Validate calculations in DuckDB/Python before making them central to the UI.
+
+### Architecture rule
+Do not move analytical logic back into `app.py` merely because it is convenient.
+
+### Performance rule
+Measure before optimizing. Do not replace working architecture because something merely feels slow.
+
+### History rule
+Sprint records describe not only what changed, but what was learned and how the direction changed.
 
 ---
 
-# 7. Useful commands
-
-Activate environment:
+# Useful commands
 
 ```bash
 cd ~/fiskedata-analyzer
 source .venv/bin/activate
-```
-
-Run Streamlit:
-
-```bash
 streamlit run app.py
-```
-
-Check Git:
-
-```bash
 git status
+git log --oneline -10
+git pull
 ```
 
-Check recent commits:
-
-```bash
-git log --oneline -5
-```
+`git pull` updates the local repository from the remote repository. `git push` sends local commits to GitHub.
 
 ---
 
-# 8. Current sprint goal
-
-## 🎣 Build the first real Fleet Investigation screen
-
-Start with:
-
-**07-31 → Under 11 m → Torsk + Sei**
-
-Then display the fleet using:
-
-**Vessel name + registration + catch + NOK value**
-
-After that, make one vessel clickable and use `follow_vessels()` to show where that vessel fished during 2025.
-
-That will turn Fiskedata Analyzer from a dashboard into an actual investigation tool.
-
----
-
-# 9. Ideas / parking lot
-
-Keep ideas here instead of immediately coding them.
+# Parking lot
 
 - Map-based Home Area
 - Saved Home Areas
 - Compare two fleets
-- Compare neighboring fishing areas
-- "Who fishes here but is based elsewhere?"
-- "Where do the vessels from this area fish?"
-- "Which vessels are most dependent on this area?"
+- Who fishes here but is based elsewhere?
+- Where do vessels from this area fish?
+- Which vessels are most dependent on this area?
 - Catch value per vessel
 - Catch value per kg
 - Species mix
 - Seasonal patterns
 - Open group vs quota vessel analysis
 - AIS integration
-- Report/export to XLS
+- XLS/report export
+- FAQuery natural-language interface
 - Possible future commercial intelligence product
-
----
-
-## 2026-11-01 — Mid-sprint checkpoint
-
-### DONE
-- Validated `rank_vessels_by_value()` for 07-31 → Under 11 m → Torsk + Sei: 58 vessels.
-- Confirmed 45 of the 58 vessels caught both Torsk and Sei.
-- Validated `follow_vessels()` across the full 2025 dataset.
-- For these 58 vessels: 43,983,433 NOK total recorded 2025 value.
-- 11,788,755 NOK was recorded in 07-31; 32,194,678 NOK outside 07-31 (~73.2%).
-- Validated the area-by-area value footprint of the 58-vessel fleet.
-- Identified Fiskeridirektoratet's official GIS services as the source for statistical-area names and geometries.
-- Agreed on the architecture: human map layer → official statistical codes → vessel IDs → DuckDB analysis.
-
-### NEXT
-1. Identify the exact official GIS layer for statistical-area polygons and names.
-2. Build a local area reference/translation layer.
-3. Continue the Fleet Investigation UI using the validated backend.
-
-### IDEAS
-- Map-based My Home Area
-- Multi-cell Home Area
-- Human-friendly area names
-- Home vs outside-home comparison
-- Species and area footprint
-
-## Sprint habit
-
-At the end of every sprint, update:
-
-### DONE
-What actually works.
-
-### NEXT
-The next 1–3 concrete tasks.
-
-### IDEAS
-Interesting things that should NOT distract from the current sprint.
-
-### GIT
-Last pushed commit.
-
-### 2026-11-01 — Landing / buyer-register investigation
-
-#### DONE
-- Investigated `Mottaksstasjon` as the physical landing-place identifier.
-- Downloaded Fiskeridirektoratet's official buyer register.
-- Confirmed `Mottaksstasjon` / approval-number codes can be linked to the buyer register via `Godkjenningsnummer Mattilsynet`.
-- Confirmed the buyer register contains company name, buyer/site ID, address, municipality and coordinates.
-- Confirmed one approval number may correspond to multiple registered buyer sites.
-- Example: M325 maps to Marine Sales AS, Hitramat AS and AS Aalesundfisk.
-- Example: M360 maps to Abs AS and Andreas Bjørge Seafood.
-- Example: M374 maps to Marine Sales AS at Kaia på Stokksund, Herøy.
-- Confirmed some buyer sites have coordinates while others do not.
-- Confirmed 2,738 buyer-register rows with non-null buyer/site IDs and no duplicate buyer-site IDs in the downloaded register.
-- Found 406 `Mottaksstasjon` codes linked to more than one buyer/site ID.
-- The most complex observed code had 5 buyer/site IDs.
-- Conclusion: landing geography is a many-to-many / multi-site real-world structure, not a simple single-point lookup.
-- Important distinction established:
-  buyer/company ≠ receiving site ≠ physical quay/landing location.
-- This supports the architecture pivot toward:
-  AIS activity → vessel → catch → landing → receiving site/buyer.
-
-#### NEXT
-1. Model buyer/company and receiving-site relationships explicitly in the data layer.
-2. Determine how `Mottaksstasjon` in catch data should be resolved when several buyer sites share the same approval number.
-3. Investigate whether the official data contains additional information that can distinguish the actual physical landing point from the buyer/company location.
-4. Keep statistical sea areas as secondary/reference geography, not as the primary representation of fishing grounds.
-
-#### IMPORTANT
-Real-world validation: a buyer may have a physical facility at a quay, a sales point at a marina/port, and/or collect fish from vessels by vehicle. Therefore "landing place" must not be treated as simply "the buyer's company address" or "one coordinate per buyer".
-
-This file is the project's memory between ChatGPT chats.
