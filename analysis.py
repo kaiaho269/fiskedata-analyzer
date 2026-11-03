@@ -14,6 +14,18 @@ def base_query():
             delim=';'
         )
     """
+def get_species():
+    conn = connect()
+
+    query = f"""
+        SELECT DISTINCT "Art - gruppe" AS species
+        {base_query()}
+        WHERE "Art - gruppe" IS NOT NULL
+        ORDER BY species
+    """
+
+    return [row[0] for row in conn.execute(query).fetchall()]
+
 def rank_vessels_by_value(
     start_date=None,
     end_date=None,

@@ -1,6 +1,6 @@
 import streamlit as st
 import duckdb
-from analysis import rank_vessels_by_value, get_summary
+from analysis import rank_vessels_by_value, get_summary, get_species
 
 CSV_PATH = "/home/kaiaho/Downloads/fangstdata_2025.csv"
 
@@ -32,6 +32,13 @@ gear_filter = st.sidebar.selectbox(
         "All gears",
         "Juksa/pilk"
     ]
+)
+
+species_options = ["All species"] + get_species()
+
+species_filter = st.sidebar.selectbox(
+    "Species",
+    species_options
 )
 
 area_filter = st.sidebar.selectbox(
@@ -78,9 +85,11 @@ if area_filter == "Romsdalsfjorden 07-31":
 elif area_filter == "Romsdalsfjorden 07-32":
     areas = [("07", "32")]
 
+selected_species = None if species_filter == "All species" else species_filter
+
 fleet = rank_vessels_by_value(
     areas=areas,
-    species=["Torsk", "Sei"],
+    species=selected_species,
     vessel_size=length_filter,
     gear=gear_filter
 )
