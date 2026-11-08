@@ -101,27 +101,24 @@ The species filter is now data-driven from the dataset rather than hard-coded.
 
 ---
 
-# Current sprint — Sprint 14
+# Current sprint – Sprint 15
 
-## Project memory cleanup and history reconstruction
+## FA Core – Stabilization
 
-The first 13 meaningful repository commits are being represented as individual sprint records under `sprints/`.
+The next development phase focuses on
+analytical consistency, reliability and testing.
 
-This keeps the project guide small and current while preserving the reasoning and direction changes that shaped FA.
+### Priority tasks
 
-### Tasks
-1. Keep one markdown file per historical sprint.
-2. Use `SPRINT.md` only as the current project guide.
-3. Retire the old monolithic `sprint.md` history file.
-4. After the cleanup, begin new development from a clean Sprint 14 state.
+1. Correct KPI filtering across all four dimensions.
+2. Establish shared filtering logic in the analysis layer.
+3. Review SQL parameterization and query safety.
+4. Investigate DuckDB connection and CSV loading strategy.
+5. Introduce automated analytical tests.
+6. Document the current architecture.
 
----
-
-# Next 1–3 development tasks
-
-1. Finish the Fleet Investigation UI using the now-clean filter architecture.
-2. Make vessel drill-down useful: home-area catch/value vs outside-area catch/value and elsewhere footprint.
-3. Continue validating geography and landing relationships before adding map/AIS complexity.
+Sprint 14 – Architecture and UI audit: COMPLETED.
+See `sprints/sprint14.md`.
 
 ---
 
