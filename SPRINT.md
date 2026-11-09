@@ -101,24 +101,28 @@ The species filter is now data-driven from the dataset rather than hard-coded.
 
 ---
 
-# Current sprint – Sprint 15
+# Current sprint — Sprint 16
 
-## FA Core – Stabilization
+## FA Core — Data-backed stabilization
 
-The next development phase focuses on
-analytical consistency, reliability and testing.
+Sprint 15 was closed as a pause after its documentation and code review checkpoints. No application code or automated tests were changed. Implementation was deferred because the local 2025 CSV and the user's laptop are unavailable while travelling.
 
-### Priority tasks
+Sprint 16 should resume stabilization when the user is home and can access the dataset. Begin by verifying source field meanings—especially vessel-length group codes—before deciding or coding length-filter behavior.
 
-1. Correct KPI filtering across all four dimensions.
-2. Establish shared filtering logic in the analysis layer.
-3. Review SQL parameterization and query safety.
-4. Investigate DuckDB connection and CSV loading strategy.
-5. Introduce automated analytical tests.
-6. Document the current architecture.
+### Planned priorities
 
-Sprint 14 – Architecture and UI audit: COMPLETED.
-See `sprints/sprint14.md`.
+1. Inspect and document the dataset's vessel-length group codes and relevant field availability.
+2. Finalize the confirmed / excluded / unknown record classification against actual data fields.
+3. Keep unknown reasons extensible and record every relevant missing-data reason; a record can have multiple reasons. Only missing information needed by an active filter makes the result unknown.
+4. Ensure the confirmed vessel population used by vessel count and ranking is consistent. Report catch-record counts separately; do not silently merge unknown records into confirmed results or discard them without reporting.
+5. Implement shared analysis-layer filtering and review SQL parameterization.
+6. Add automated tests with small fixtures and manually verified expected results.
+7. Investigate DuckDB connection and CSV loading behavior; document architecture and actual test limitations.
+
+Do not claim full-dataset validation unless it is performed with the local 2025 data and recorded.
+
+Sprint 14 – Architecture and UI audit: COMPLETED. See `sprints/sprint14.md`.
+Sprint 15 – Baseline review and planning: CLOSED / PAUSED. See `sprints/sprint15.md`.
 
 ---
 
