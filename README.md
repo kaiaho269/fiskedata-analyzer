@@ -1,5 +1,10 @@
 # Fiskedata Analyzer
 
+# Fiskedata Analyzer
+
+![GitHub Actions Workflow Status](https://github.com/kaiaho269/fiskedata-analyzer/actions/workflows/check_sample.yml/badge.svg)
+
+Analysis tool for Norwegian fishing vessel and catch data.
 Analysis tool for Norwegian fishing vessel and catch data.
 
 ## About
