@@ -1,0 +1,38 @@
+name: Check sample fixture
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate-sample:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate sample CSV
+        run: |
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+
+          path = Path("tests/fixtures/fiskedata_sample.csv")
+
+          if not path.exists():
+              raise SystemExit(f"Missing file: {path}")
+
+          with path.open("r", encoding="utf-8-sig", newline="") as f:
+              reader = csv.reader(f, delimiter=";")
+              header = next(reader)
+              rows = list(reader)
+
+          print(f"Columns: {len(header)}")
+          print(f"Rows: {len(rows)}")
+
+          assert len(header) == 133
+          assert len(rows) == 10_000
+          print("Sample CSV validation passed.")
+          PY
