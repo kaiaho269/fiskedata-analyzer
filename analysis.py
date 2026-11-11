@@ -14,6 +14,8 @@ def base_query():
             delim=';'
         )
     """
+
+
 def get_species():
     conn = connect()
 
@@ -25,6 +27,7 @@ def get_species():
     """
 
     return [row[0] for row in conn.execute(query).fetchall()]
+
 
 def rank_vessels_by_value(
     start_date=None,
@@ -83,7 +86,8 @@ def rank_vessels_by_value(
             f"'{g}'" for g in gear
         )
 
-        filters.append(f'"Redskap" IN ({gear_list})')    
+        filters.append(f'"Redskap" IN ({gear_list})')
+
     where_clause = " AND ".join(filters)
 
     query = f"""
@@ -97,9 +101,10 @@ def rank_vessels_by_value(
         GROUP BY "Fartøy ID"
         ORDER BY catch_value_nok DESC
     """
-    
-    
+
     return conn.execute(query).fetchdf()
+
+
 def follow_vessels(vessel_ids):
     conn = connect()
 
@@ -125,6 +130,7 @@ def follow_vessels(vessel_ids):
     """
 
     return conn.execute(query).fetchdf()
+
 
 def get_summary(length=None, gear=None):
     conn = connect()

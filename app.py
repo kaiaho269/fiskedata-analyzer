@@ -1,5 +1,4 @@
 import streamlit as st
-import duckdb
 from analysis import rank_vessels_by_value, get_summary, get_species
 
 CSV_PATH = "/home/kaiaho/Downloads/fangstdata_2025.csv"
